@@ -29,7 +29,6 @@ export default function HomeScreen() {
         setError(null);
         const data = await fetchSeries();
         setSeries(data);
-        console.log('Series loaded:', data);
       } catch (err) {
         console.error('Error loading series:', err);
         setError(err instanceof Error ? err.message : 'Failed to load series');
@@ -41,46 +40,50 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={{uri:''}}
-        
-        />
-      }>
-        
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Series</ThemedText>
-        <HelloWave />
-      </ThemedView>
-
-      {/* Loading state */}
+    <>
+      {/* loading */}
       {loading && (
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText>Loading series...</ThemedText>
+        <ThemedView style={styles.loadingContainer}>
+          <Image source={require('@/assets/images/idilio-logo.jpeg')} style={styles.loadingImage} />
         </ThemedView>
       )}
 
-      {/* Error state */}
-      {error && (
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText style={{ color: 'red' }}>Error: {error}</ThemedText>
-        </ThemedView>
-      )}
+      {/* Main Content */}
+      {!loading && (
+        <ParallaxScrollView
+          headerBackgroundColor={{ light: '#000000', dark: '#000000' }}
+          headerImage={
+            <Image
+              source={require('@/assets/images/idilio-logo.jpeg')}
+              style={styles.headerLogo}
+            />
+          }>
+          <ThemedView style={styles.titleContainer}>
+            <ThemedText type="title">Series</ThemedText>
+            <HelloWave />
+          </ThemedView>
 
-      {/* Series list */}
-      {series.map((item) => (
-        <ThemedView key={item.id} style={styles.seriesContainer}>
-          <ThemedText type="subtitle">{item.titulo}</ThemedText>
-          <ThemedText>{item.sinopsis}</ThemedText>
-          <ThemedText style={styles.categories}>
-            Categories: {item.categoria.join(', ')}
-          </ThemedText>
-          <Image source={{ uri: item.poster_url }} style={{ width: '100%', height: 200, borderRadius: 8 }} />
-        </ThemedView>
-      ))}
-    </ParallaxScrollView>
+          {/* Error state */}
+          {error && (
+            <ThemedView style={styles.stepContainer}>
+              <ThemedText style={{ color: 'red' }}>Error: {error}</ThemedText>
+            </ThemedView>
+          )}
+
+          {/* Series list */}
+          {series.map((item) => (
+            <ThemedView key={item.id} style={styles.seriesContainer}>
+              <ThemedText type="subtitle">{item.titulo}</ThemedText>
+              <ThemedText>{item.sinopsis}</ThemedText>
+              <ThemedText style={styles.categories}>
+                Categories: {item.categoria.join(', ')}
+              </ThemedText>
+              <Image source={{ uri: item.poster_url }} style={{ width: '100%', height: 200, borderRadius: 8 }} />
+            </ThemedView>
+          ))}
+        </ParallaxScrollView>
+      )}
+    </>
   );
 }
 
@@ -106,11 +109,29 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     opacity: 0.7,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
     position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
   },
+  loadingImage: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
+  },
+  headerLogo: {
+    width: 100,
+    height: 100,
+    position: 'absolute',
+    top: 20,
+    left: 30,
+    resizeMode: 'contain',
+  }
 });
