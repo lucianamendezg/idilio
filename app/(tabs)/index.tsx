@@ -78,8 +78,6 @@ export default function HomeScreen() {
             data={series}
             keyExtractor={(item:Category) => item.categoria}
             renderItem={({ item: category }: { item: Category }) => {
-              console.log('Rendering category:', category);
-              console.log('Category series:', category.series_data);
               return (
               <ThemedView key={category.categoria} style={styles.seriesContainer}>
                 <ThemedText type="subtitle">{category.categoria}</ThemedText>
@@ -89,19 +87,18 @@ export default function HomeScreen() {
                   data={category.series_data}
                   keyExtractor={(series) => series.id.toString()}
                   renderItem={({ item: series }) => (
-                    <View style={{ width: 120, marginHorizontal: 8 }}>
+                    <View style={{ width: 150, marginHorizontal: 10, marginTop: 10 }}>
                         <Image
                           source={{ uri: series.poster_url }}
                           style={styles.poster}
-                          resizeMode="cover"
                         />
-                      <ThemedText style={{fontWeight: '500'}} numberOfLines={1}>
+                      <ThemedText style={styles.titulo}>
                         {series.titulo}
                       </ThemedText>
                     </View>
                   )}
                   showsHorizontalScrollIndicator={false}
-                  snapToInterval={120 + 16} // card width + margin
+                  snapToInterval={150 + 16} // card width + margin
                   snapToAlignment="start"
                   decelerationRate="fast"
                   contentContainerStyle={styles.horizontalListContent}
@@ -128,9 +125,7 @@ const styles = StyleSheet.create({
   },
   seriesContainer: {
     gap: 8,
-    marginBottom: 16,
     padding: 16,
-    borderRadius: 8,
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
   },
   categories: {
@@ -164,12 +159,16 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   horizontalListContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
   },
   poster: {
-    width: 120,
-    height: 180,
+    width: 150,
+    height: 210,
     borderRadius: 8,
     backgroundColor: '#333',
+  },
+  titulo: {
+    fontWeight: '600',
+    marginTop: 10,
   },
 });
