@@ -1,24 +1,27 @@
 import { fetchSeries } from '@/api/fetchSeries';
-import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 
-// TypeScript interface for Series data
 interface Series {
   id: number;
-  created_at: string;
   titulo: string;
   sinopsis: string;
   poster_url: string;
-  categoria: string[];
 }
 
+interface Category {
+  categoria: string;
+  series_data: Series[];
+}
+
+type Categories = Category[];
+
 export default function HomeScreen() {
-  const [series, setSeries] = useState<Series[]>([]);
+  const [series, setSeries] = useState<Categories>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,6 +31,7 @@ export default function HomeScreen() {
         setLoading(true);
         setError(null);
         const data = await fetchSeries();
+        console.log(data);
         setSeries(data);
       } catch (err) {
         console.error('Error loading series:', err);
@@ -60,7 +64,6 @@ export default function HomeScreen() {
           }>
           <ThemedView style={styles.titleContainer}>
             <ThemedText type="title">Series</ThemedText>
-            <HelloWave />
           </ThemedView>
 
           {/* Error state */}
@@ -71,16 +74,42 @@ export default function HomeScreen() {
           )}
 
           {/* Series list */}
-          {series.map((item) => (
-            <ThemedView key={item.id} style={styles.seriesContainer}>
-              <ThemedText type="subtitle">{item.titulo}</ThemedText>
-              <ThemedText>{item.sinopsis}</ThemedText>
-              <ThemedText style={styles.categories}>
-                Categories: {item.categoria.join(', ')}
-              </ThemedText>
-              <Image source={{ uri: item.poster_url }} style={{ width: '100%', height: 200, borderRadius: 8 }} />
-            </ThemedView>
-          ))}
+          <FlatList
+            data={series}
+            keyExtractor={(item:Category) => item.categoria}
+            renderItem={({ item: category }: { item: Category }) => {
+              console.log('Rendering category:', category);
+              console.log('Category series:', category.series_data);
+              return (
+              <ThemedView key={category.categoria} style={styles.seriesContainer}>
+                <ThemedText type="subtitle">{category.categoria}</ThemedText>
+                {/* Horizontal row */}
+                <FlatList
+                  horizontal
+                  data={category.series_data}
+                  keyExtractor={(series) => series.id.toString()}
+                  renderItem={({ item: series }) => (
+                    <View style={{ width: 120, marginHorizontal: 8 }}>
+                        <Image
+                          source={{ uri: series.poster_url }}
+                          style={styles.poster}
+                          resizeMode="cover"
+                        />
+                      <ThemedText style={{fontWeight: '500'}} numberOfLines={1}>
+                        {series.titulo}
+                      </ThemedText>
+                    </View>
+                  )}
+                  showsHorizontalScrollIndicator={false}
+                  snapToInterval={120 + 16} // card width + margin
+                  snapToAlignment="start"
+                  decelerationRate="fast"
+                  contentContainerStyle={styles.horizontalListContent}
+                />
+              </ThemedView>
+            );
+            }}
+          />
         </ParallaxScrollView>
       )}
     </>
@@ -133,5 +162,14 @@ const styles = StyleSheet.create({
     top: 20,
     left: 30,
     resizeMode: 'contain',
-  }
+  },
+  horizontalListContent: {
+    paddingHorizontal: 16,
+  },
+  poster: {
+    width: 120,
+    height: 180,
+    borderRadius: 8,
+    backgroundColor: '#333',
+  },
 });

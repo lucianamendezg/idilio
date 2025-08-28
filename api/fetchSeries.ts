@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient';
 
 export async function fetchSeries() {
   const { data, error } = await supabase
-    .from('series')
+    .from('category_series_view')
     .select('*');
 
   if (error) {
