@@ -33,7 +33,6 @@ export default function HomeScreen() {
         setLoading(true);
         setError(null);
         const data = await fetchSeries();
-        console.log(data);
         setSeries(data);
       } catch (err) {
         console.error('Error loading series:', err);

@@ -25,7 +25,6 @@ export default function SeriesDetail() {
       async function loadEpisodes() {
         try {
           const data = await fetchEpisodes(Number(id));
-          console.log(data);
           setCapitulos(data);
         } catch (err) {
           console.error('Error loading episodes:', err);
