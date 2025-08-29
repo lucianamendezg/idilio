@@ -3,8 +3,9 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 interface Series {
   id: number;
@@ -21,6 +22,7 @@ interface Category {
 type Categories = Category[];
 
 export default function HomeScreen() {
+  const router = useRouter();
   const [series, setSeries] = useState<Categories>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +71,7 @@ export default function HomeScreen() {
           {/* Error state */}
           {error && (
             <ThemedView style={styles.stepContainer}>
-              <ThemedText style={{ color: 'red' }}>Error: {error}</ThemedText>
+              <ThemedText style={styles.error}>Error: {error}</ThemedText>
             </ThemedView>
           )}
 
@@ -81,28 +83,35 @@ export default function HomeScreen() {
               return (
               <ThemedView key={category.categoria} style={styles.seriesContainer}>
                 <ThemedText type="subtitle">{category.categoria}</ThemedText>
-                {/* Horizontal row */}
-                <FlatList
+                <ScrollView
                   horizontal
-                  data={category.series_data}
-                  keyExtractor={(series) => series.id.toString()}
-                  renderItem={({ item: series }) => (
-                    <View style={{ width: 150, marginHorizontal: 10, marginTop: 10 }}>
-                        <Image
-                          source={{ uri: series.poster_url }}
-                          style={styles.poster}
-                        />
-                      <ThemedText style={styles.titulo}>
-                        {series.titulo}
-                      </ThemedText>
-                    </View>
-                  )}
                   showsHorizontalScrollIndicator={false}
-                  snapToInterval={150 + 16} // card width + margin
+                  snapToInterval={166}
                   snapToAlignment="start"
                   decelerationRate="fast"
                   contentContainerStyle={styles.horizontalListContent}
-                />
+                >
+                  {category.series_data.map((series) => (
+                    <Pressable
+                      key={series.id.toString()}
+                      onPress={() => router.push({
+                        pathname: "/series/[id]",
+                        params: {       
+                          id: series.id.toString()
+                        }
+                      })}
+                      style={styles.pressable}
+                    >
+                      <Image
+                        source={{ uri: series.poster_url }}
+                        style={styles.poster}
+                      />
+                      <ThemedText style={styles.titulo}>
+                        {series.titulo}
+                      </ThemedText>
+                    </Pressable>
+                  ))}
+                </ScrollView>
               </ThemedView>
             );
             }}
@@ -119,6 +128,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  error: {
+    color: 'red',
+  },
   stepContainer: {
     gap: 8,
     marginBottom: 8,
@@ -127,6 +139,11 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 16,
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  pressable: {
+    width: 150, 
+    marginHorizontal: 10, 
+    marginTop: 10,
   },
   categories: {
     fontSize: 12,
