@@ -1,50 +1,77 @@
-# Welcome to your Expo app 👋
+# idilio.tv
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Este es mi proyecto para el reto técnico de idilio.tv. Utilizé **React Native + Typescript, y Supabase** como backend. El proyecto consiste en crear una página tipo Netflix que muestra diferentes series. Si le das clic a la serie, puedes ver su sinopsis y lista de capítulos.
 
-## Get started
+## Comenzando
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+El proyecto se ejecuta con el siguiente comando:
+```
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Base de datos
 
-## Learn more
+Para explicar el SQL utilizado, primero quisiera mostrar la estructura de mi base de datos:
 
-To learn more about developing your project with Expo, look at the following resources:
+![estructura de la base de datos](/assets/images/diagram.png)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+De aquí, escribí 2 funciones de SQL que creaban views que tenían esctructuras más fáciles de programar, haciendo que la consulta sea más eficiente:
 
-## Join the community
+```
+CREATE OR REPLACE VIEW category_series_view AS
+SELECT 
+  categoria,
+  JSON_AGG(DISTINCT jsonb_build_object(
+    'id', id,
+    'titulo', titulo,
+    'sinposis', sinopsis,
+    'categoria', categoria,
+    'poster_url', poster_url
+  )) as series_data
+FROM (
+  SELECT 
+    id,
+    titulo,
+    sinopsis,
+    poster_url,
+    categoria
+  FROM series, UNNEST(categorias) AS categoria
+) 
+GROUP BY categoria
+```
 
-Join our community of developers creating universal apps.
+```
+CREATE OR REPLACE VIEW capitulo_series_view AS
+SELECT 
+  c.id AS capitulo_id,
+  c.series_id,
+  c.numero,
+  c.nombre AS capitulo_nombre,
+  s.titulo AS serie_titulo,
+  s.sinopsis AS serie_sinopsis,
+  s.poster_url
+FROM capitulos c
+LEFT JOIN series s ON c.series_id = s.id
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Decisiones técnicas
+
+La primera decisión técnica que hice fue de que manera iba a agregar el CSS. Yo utilizo mucho Tailwind, pero como el proyecto es muy simple, decidí utilizar StyleSheet. Lo había usado antes, pero siento que a veces se ve un poco desordenado. Mantuve todo muy "vanilla" por la simpleza del proyecto.
+
+La segunda decisión técnica fue que hice 2 consultas: una para series y otra para episodios. Entiendo que eso puede afectar la eficiencia cuando manejas varios datos. Pude haber utilizado mejores maneras de almacenar datos, por ejemplo, utilizar Redux. Si tuviera que construir una aplicación que necesitara escalar, habría cambiado la forma en que manejo el estado de los datos. Pero decidí mantener el programa simple.
+
+
+
+## Prompts Usados de AI
+
+Para AI utilizé Copilot + Deepseek. Lo utilizé para lo siguiente:
+* Resolver un problema con conflictos de versiones de Node.js 
+* Resolver un "warning"  
+* Escribir CSS que después yo edité a mi gusto
+
+## Si tuviera más tiempo
+
+Si tuviera más tiempo, hay 2 cosas que me gustaría cambiar:
+* **Ciberseguridad**: Pude haber implementado mejores maneras de consultar los datos, ya que no sé sobre "RLS". Si tienes el link, puedes editar la base de datos.
+* **Diseño**:  Aprendí como hacer diferentes diseños para web y iOS/Android. Me hubiera gustado hacer que se vea mejor, especialmente la versión web.
+* **Animación**: Netflix utiliza animaciones que hacen navegar la app una experiencia más placentera para el usuario. Me hubiera gustado agregarlas para que se vea más profesional.
