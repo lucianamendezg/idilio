@@ -5,7 +5,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { FlatList, Pressable, StyleSheet } from 'react-native';
 
 interface Series {
   id: number;
@@ -78,44 +78,45 @@ export default function HomeScreen() {
           {/* Series list */}
           <FlatList
             data={series}
-            keyExtractor={(item:Category) => item.categoria}
+            keyExtractor={(item: Category) => item.categoria}
+            scrollEnabled = {false}
             renderItem={({ item: category }: { item: Category }) => {
               return (
-              <ThemedView key={category.categoria} style={styles.seriesContainer}>
-                <ThemedText type="subtitle">{category.categoria}</ThemedText>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  snapToInterval={166}
-                  snapToAlignment="start"
-                  decelerationRate="fast"
-                  contentContainerStyle={styles.horizontalListContent}
-                >
-                  {category.series_data.map((series) => (
-                    <Pressable
-                      key={series.id.toString()}
-                      onPress={() => router.push({
-                        pathname: "/series/[id]",
-                        params: {       
-                          id: series.id.toString()
-                        }
-                      })}
-                      style={styles.pressable}
-                    >
-                      <Image
-                        source={{ uri: series.poster_url }}
-                        style={styles.poster}
-                      />
-                      <ThemedText style={styles.titulo}>
-                        {series.titulo}
-                      </ThemedText>
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              </ThemedView>
-            );
-            }}
+                <ThemedView key={category.categoria} style={styles.seriesContainer}>
+                  <ThemedText type="subtitle">{category.categoria}</ThemedText>
+                  <FlatList
+                    horizontal
+                    data={category.series_data}
+                    keyExtractor={(series) => series.id.toString()}
+                    showsHorizontalScrollIndicator={false}
+                    snapToInterval={166}
+                    snapToAlignment="start"
+                    decelerationRate="fast"
+                    contentContainerStyle={styles.horizontalListContent}
+                    renderItem={({ item: series }) => (
+                      <Pressable
+                        onPress={() => router.push({
+                          pathname: "/series/[id]",
+                          params: {       
+                            id: series.id.toString()
+                          }
+                        })}
+                        style={styles.pressable}
+                      >
+                        <Image
+                          source={{ uri: series.poster_url }}
+                          style={styles.poster}
+                        />
+                        <ThemedText style={styles.titulo}>
+                          {series.titulo}
+                        </ThemedText>
+                      </Pressable>
+                    )}
           />
+      </ThemedView>
+    );
+  }}
+/>
         </ParallaxScrollView>
       )}
     </>
