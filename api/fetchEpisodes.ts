@@ -1,10 +1,11 @@
 import { supabase } from './supabaseClient';
 
-export async function fetchSeries() {
+export async function fetchEpisodes(seriesId: number) {
   const { data, error } = await supabase
-    .from('category_series_view')
-    .select('*');
-
+    .from('capitulo_series_view')
+    .select('*')
+    .eq('series_id', seriesId)
+    .order('numero',{ ascending: true })
   if (error) {
     console.error('Error fetching series:', error);
     throw error;
